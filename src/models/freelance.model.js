@@ -30,12 +30,10 @@ const FreelanceSchema = new mongoose.Schema({
     skills: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Skill',
-        required: true,
     }],
     jobs: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Job',
-        required: true,
     }],
 });
 

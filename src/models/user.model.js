@@ -29,7 +29,7 @@ const UserSchema = new mongoose.Schema({
     },
     phoneNumber : {
         type: String,
-        required: true,
+        required: false,
         unique: [true, 'Phone number already exists'],
     },
     email : {
@@ -41,6 +41,8 @@ const UserSchema = new mongoose.Schema({
     }, 
     password : {type: String, required: true, trim: true},
     isAdmin: {type: Boolean, default: false},
+    isFreelancer: {type: Boolean, default: false},
+    isCompany: {type: Boolean, default: false},
     Freelancer: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Freelancer',
