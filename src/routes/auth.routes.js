@@ -12,8 +12,4 @@ router.put("/user/reset_password", verifyToken, authController.password_reset);
 router.delete("/user/delete", verifyToken, authController.delete_myAccount);
 router.get("/user/logout", authController.logout);
 
-
-
-
-
 module.exports = router;
