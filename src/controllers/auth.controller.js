@@ -5,85 +5,299 @@ const Freelancer = require('../models/freelance.model');
 const Company = require('../models/company.model');
 
 /*
-    * @route   POST api/auth/register/freelancer
-    * @desc    Register an user and new freelancer 
-    * @access  Public  
+    * @route   POST API.FindFreelance/v1/auth/register/freelancer
+    * @desc    Register an user and new freelancer
+    * @access  Public 
 */
 exports.register_Freelancer = async (req, res, next) => {
+    if (await User.findOne({ email: req.body.user.email })) {
+      return res.status(400).send({ message: 'Email already exists', auth : false, token: null });
+    }
+    if (await User.findOne({ phoneNumber: req.body.user.phoneNumber })) {
+      return res.status(400).send({ message: 'Phone number already exists', auth : false, token: null });
+    }
+  
+    const hashedPassword = await bcrypt.hash(req.body.user.password, 10);
+    const newUser = new User({
+      email: req.body.user.email,
+      password: hashedPassword,
+      lastName: req.body.user.lastName,
+      firstName: req.body.user.firstName,
+      address: req.body.user.address,
+      phoneNumber: req.body.user.phoneNumber,
+      isAdmin: false,
+      isFreelancer: true,
+      isCompany: false,
+      Company: null,
+      Freelancer: null
+    });
+    const newFreelancer = new Freelancer({
+      user: newUser._id,
+      socialReason: req.body.freelance.socialReason,
+      socialStatus: req.body.freelance.socialStatus,
+      dailyRate: req.body.freelance.dailyRate,
+      yearsOfExperience: req.body.freelance.yearsOfExperience,
+      skills: null,
+      jobs: null
+    });
+  
+    try {
+      await newFreelancer.save();
+      newUser.Freelancer = newFreelancer._id;
+      await newUser.save();
+  
+      const userToken = jwt.sign({
+        id: newUser._id,
+        isAdmin: newUser.isAdmin,
+        isFreelancer: newUser.isFreelancer,
+        isCompany: newUser.isCompany || false
+      }, process.env.SECRET_KEY);
+  
+      res.status(201).send({
+        message: 'User and Freelancer created successfully',
+        auth: true,
+        token: userToken
+      });
+    } catch (error) {
+      res.status(500).send({
+        message: 'Error while creating user and freelancer : ' + error,
+        auth: false,
+        token: null
+      });
+    }
+  };
+
+/*
+    * @route   POST API.FindFreelance/v1/auth/register/user_inCompany
+    * @desc    Register an user in a company and new company
+    * @access  Public
+*/
+exports.register_User_inCompany = async (req, res) => {
+    const emailExists = await User.findOne({ email: req.body.user.email });
+    const numberExists = await User.findOne({ phoneNumber: req.body.user.phoneNumber});
     const hashedPassword = await bcrypt.hash(req.body.user.password, 10);
     const newUser = new User({
         email: req.body.user.email,
         password: hashedPassword,
         lastName: req.body.user.lastName,
         firstName: req.body.user.firstName,
-        address: {
-            street: req.body.user.address.street,
-            city: req.body.user.address.city,
-            zipCode: req.body.user.address.zipCode,
-            country: req.body.user.address.country,
-        },
+        address: req.body.user.address,
         phoneNumber: req.body.user.phoneNumber,
         isAdmin: false,
-        isFreelancer: true,
-        isCompany: false,
+        isFreelancer: false,
+        isCompany: true,
         Company: null,
         Freelancer: null,
     });
-    const newFreelancer = new Freelancer({
-        user: newUser._id,
-        socialReason: req.body.freelance.socialReason,
-        socialStatus: req.body.freelance.socialStatus,
-        dailyRate: req.body.freelance.dailyRate,
-        yearsOfExperience: req.body.freelance.yearsOfExperience,
-        skills: null,
-        jobs: null,
+    const newCompany = new Company({
+        users: newUser._id,
+        socialReason: req.body.company.socialReason,
+        socialStatus: req.body.company.socialStatus,
+        socialCapital: req.body.company.socialCapital,
+        siret: req.body.company.siret,
+        address: req.body.company.address,
+        missions: null,
     });
 
-    console.log(newUser);
-    if (newUser.isFreelancer || newUser.Freelancer === null) {
-        try {
-            newFreelancer.save().then((freelancer) => {
-                newUser.Freelancer = freelancer._id;
-                newUser.save()
-                .then((user) => {
-                    let userToken = jwt.sign({
-                        id : user._id,
-                        isAdmin : user.isAdmin,
-                        isFreelancer : user.isFreelancer,
-                        isCompany : user.isCompany ? user.isCompany : false,
-                    }, 
-                    process.env.SECRET_KEY,
-                    );
-                    res.status(201).send({
-                        message: 'User and Freelancer created successfully',
-                        auth : true,
-                        token: userToken,
-                    });
-                });
-            });
-        } catch (error) {  
-            console.log(error);
-            res.status(500).send({
-                message: 'Error while creating user and freelancer',
-                auth : false,
-                token: null,
-            });
-        }
+    if (emailExists) return res.status(400).send({ message: 'Email already exists', auth : false, token: null });
+    if (numberExists) return res.status(400).send({ message: 'Phone number already exists', auth : false, token: null });
+
+    const company = await Company.findOne({siret: req.body.company.siret});
+    if (company) {
+        newUser.Company = company._id;
+        await newUser.save();
+        const userToken = jwt.sign({
+            id : newUser._id,
+            isAdmin : newUser.isAdmin,
+            isFreelancer : newUser.isFreelancer,
+            isCompany : newUser.isCompany,
+        }, process.env.SECRET_KEY);
+        return res.status(201).send({ 
+            message: 'User created successfully and added to an existing company', 
+            auth : true, 
+            token: userToken 
+        });
     } else {
-        res.status(400).send({
-            message: 'User is not a freelancer',
-            auth : false,
-            token: null,
+        await newCompany.save();
+        newUser.Company = newCompany._id;
+        await newUser.save();
+        const userToken = jwt.sign({
+            id : newUser._id,
+            isAdmin : newUser.isAdmin,
+            isFreelancer : newUser.isFreelancer,
+            isCompany : newUser.isCompany,
+        }, process.env.SECRET_KEY);
+        return res.status(201).send({
+            message: 'User and Company created successfully', 
+            auth : true, 
+            token: userToken 
         });
     }
 };
 
-exports.register_User_inCompany = async (req, res) => {};
+/*
+    * @route   POST API.FindFreelance/v1/auth/login
+    * @desc    Login an user
+    * @access  Public
+    * @body    email, password
+*/
+exports.login = async (req, res) => {
+    try {
+        const user = await User.findOne({email: req.body.email});
+        if (!user){
+            return res.status(404).send({ 
+                message: 'User not found.Please check your email.', 
+                auth : false, 
+                token: null 
+            });
+        }
+        const passwordIsValid = await bcrypt.compare(req.body.password, user.password);
+        if (!passwordIsValid){
+            return res.status(401).send({ 
+                message: 'Invalid password. Please check your password.', 
+                auth : false, 
+                token: null 
+            });
+        }
+        const userToken = jwt.sign({
+            id : user._id,
+            isAdmin : user.isAdmin,
+            isFreelancer : user.isFreelancer,
+            isCompany : user.isCompany,
+        }, process.env.SECRET_KEY);
+        res.status(200).send({
+            message: 'User logged successfully !',
+            auth: true,
+            token: userToken
+        });
+    } catch (error) {
+        res.status(500).send({
+            message: 'Error while logging in : ' + error,
+            auth: false,
+            token: null
+        });
+    }
+};
 
-exports.login = async (req, res) => {};
+/*
+    * @route   GET API.FindFreelance/v1/auth/loginAsAdmin
+    * @desc    Login as admin
+    * @access  Public
+    * @body    email, password
+    * @query   adminEmail, adminPassword
+*/
+exports.loginAsAdmin = async (req, res) => {
+    try {
 
-exports.logout = async (req, res) => {};
+    } catch (error) {
+        res.status(500).send({
+            message: 'Error while logging in as admin : ' + error,
+            auth: false,
+            token: null
+        });
+    }
+};
 
-exports.password_reset = async (req, res) => {};
-exports.password_forgot = async (req, res) => {};
 
+
+
+/*
+    * @route   GET API.FindFreelance/v1/auth/user/logout
+    * @desc    Logout an user
+    * @access  Private
+    * @body    token
+*/
+exports.logout = async (req, res) => {
+    try {
+        //TODO: implement Blacklist
+        req.userToken = null;
+        res.status(200).send({
+            message: 'User logged out successfully !',
+            auth: false,
+            token: null
+        });
+    } catch (error) {
+        res.status(500).send({
+            message: 'Error while logging out',
+            auth: false,
+            token: null
+        });
+    }
+};
+
+/*
+    * @route   PUT API.FindFreelance/v1/auth/user/reset_password
+    * @desc    Reset password
+    * @access  Private
+    * @body    token, password
+*/
+exports.password_reset = async (req, res) => {
+    console.log(req.userToken);
+    try {
+        const user = await User.findById(req.userToken.id);
+        if (!user){
+            return res.status(404).send({ 
+                message: 'User not found.', 
+                auth : false, 
+                token: null 
+            });
+        }
+        const passwordIsValid = await bcrypt.compare(req.body.newPassword, user.password);
+        if (passwordIsValid){
+            return res.status(401).send({ 
+                message: 'Invalid password. Please check your password.', 
+                auth : false, 
+                token: null 
+            });
+        }
+        const hashedPassword = await bcrypt.hash(req.body.newPassword, 10);
+        user.password = hashedPassword;
+        await user.save();
+        const userToken = jwt.sign({
+            id : user._id,
+            isAdmin : user.isAdmin,
+            isFreelancer : user.isFreelancer,
+            isCompany : user.isCompany,
+        }, process.env.SECRET_KEY);
+        res.status(200).send({
+            message: 'User password reset successfully !',
+            auth: true,
+            token: userToken
+        });
+    } catch (error) {
+        res.status(500).send({
+            message: 'Error while resetting password : ' + error,
+            auth: false,
+            token: null
+        });
+    }
+};
+
+/*
+    * @route   PUT API.FindFreelance/v1/auth/user/forgot_password
+    * @desc    Forgot password
+    * @access  Private
+    * @body    email
+*/
+exports.password_forgot = async (req, res) => {
+    // try {
+    //     const resetPasswordToken = req.body.resetPasswordToken;
+    //     const decoded = jwt.verify(resetPasswordToken, process.env.SECRET_KEY);
+    //     const user = await User.findById(decoded.id);
+    //     if (!user) {
+    //         return res.status(404).send({ message: 'No user found' });
+    //     }
+    //     const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    //     user.password = hashedPassword;
+    //     await user.save();
+    //     res.status(200).send({ message: 'Password reset successful' });
+    // } catch (err) {
+    //     return res.status(500).send({ message: err.message });
+    // }
+
+};
+
+
+
+
+  
