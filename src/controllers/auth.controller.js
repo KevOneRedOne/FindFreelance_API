@@ -259,7 +259,6 @@ exports.logout = async (req, res) => {
     * @body    token, password
 */
 exports.password_reset = async (req, res) => {
-    console.log(req.userToken);
     try {
         const user = await User.findById(req.userToken.id);
         if (!user){
@@ -310,6 +309,35 @@ exports.password_reset = async (req, res) => {
 exports.password_forgot = async (req, res) => {};
 
 
-
+/*
+    *@route DELETE API.FindFreelance/v1/auth/user/delete
+    *@desc Delete account for the user
+    *@access Private
+    *@body token
+*/
+exports.delete_myAccount = async (req, res) => {
+    try {
+        const user = await User.findById(req.userToken.id);
+        if (!user){
+            return res.status(404).send({ 
+                message: 'User not found.', 
+                auth : false, 
+                token: null 
+            });
+        }
+        await user.remove();
+        res.status(200).send({
+            message: 'Account deleted successfully !',
+            auth: false,
+            token: null
+        });
+    } catch (error) {
+        res.status(500).send({
+            message: 'Error while deleting account : ' + error,
+            auth: false,
+            token: null
+        });
+    }
+};
 
   
