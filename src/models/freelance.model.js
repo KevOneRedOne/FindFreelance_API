@@ -26,7 +26,7 @@ const FreelanceSchema = new mongoose.Schema({
         max: 1000,
         default: 10
     },
-    yearsOfExperience: {type: Number, required: true},
+    yearsOfExperience: {type: Number, required: true, default: 0},
     skills: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Skill',
