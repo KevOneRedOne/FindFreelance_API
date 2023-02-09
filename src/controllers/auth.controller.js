@@ -180,26 +180,53 @@ exports.login = async (req, res) => {
 };
 
 /*
-    * @route   GET API.FindFreelance/v1/auth/loginAsAdmin
+    * @route   GET API.FindFreelance/v1/auth/admin/login
     * @desc    Login as admin
     * @access  Public
     * @body    email, password
-    * @query   adminEmail, adminPassword
 */
 exports.loginAsAdmin = async (req, res) => {
     try {
-
+        const user = await User.findOne({email: req.body.email});
+        if (!user) {
+            return res.status(404).send({
+                message: 'User not found. Please check your email.',
+                auth: false,
+                token: null
+            });
+        }
+        if (!user.isAdmin) {
+            return res.status(401).send({
+                message: 'You are not authorized to access this page. ',
+                auth: false,
+                token: null
+            });       
+        }
+        const passwordIsValid = await bcrypt.compare(req.body.password, user.password);
+        if (!passwordIsValid) {
+            return res.status(401).send({
+                message: 'Invalid password.',
+                auth: false,
+                token: null
+            });
+        }
+        const userToken = jwt.sign({
+            id : user._id,
+            isAdmin : user.isAdmin,
+        }, process.env.SECRET_KEY);
+        res.status(200).send({
+            message: 'User authenticated successfully !',
+            auth: true,
+            token: userToken
+        });
     } catch (error) {
         res.status(500).send({
-            message: 'Error while logging in as admin : ' + error,
+            message: 'Error while authenticating user : ' + error,
             auth: false,
             token: null
         });
     }
 };
-
-
-
 
 /*
     * @route   GET API.FindFreelance/v1/auth/user/logout
@@ -279,23 +306,8 @@ exports.password_reset = async (req, res) => {
     * @access  Private
     * @body    email
 */
-exports.password_forgot = async (req, res) => {
-    // try {
-    //     const resetPasswordToken = req.body.resetPasswordToken;
-    //     const decoded = jwt.verify(resetPasswordToken, process.env.SECRET_KEY);
-    //     const user = await User.findById(decoded.id);
-    //     if (!user) {
-    //         return res.status(404).send({ message: 'No user found' });
-    //     }
-    //     const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    //     user.password = hashedPassword;
-    //     await user.save();
-    //     res.status(200).send({ message: 'Password reset successful' });
-    // } catch (err) {
-    //     return res.status(500).send({ message: err.message });
-    // }
-
-};
+//TODO: implement forgot password with mailsender
+exports.password_forgot = async (req, res) => {};
 
 
 
