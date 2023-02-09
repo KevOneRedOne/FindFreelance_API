@@ -19,10 +19,10 @@ mongoose
     }
   )
   .then(() => {
-    console.log("You are connected to the database");
+    console.log("Successfully connected to the database !\n");
   })
   .catch((err) => {
-    console.log("Error connecting to the database", err);
+    console.log("Connection failed to the database.", err);
   });
 mongoose.set("strictQuery", true);
 
@@ -33,6 +33,6 @@ api.listen(process.env.API_PORT, (err) => {
     console.log("There is an issue with the Api : ",err);
   }
   console.log(
-    `\n-------------------------------\n API is running on port ${process.env.API_PORT}!\n-------------------------------\n`
+    `\n----------------------------------------\n API Freelancer is running on port ${process.env.API_PORT}\n----------------------------------------\n`
   );
 });
