@@ -13,7 +13,7 @@ const companySchema = new mongoose.Schema({
         required: true, 
         trim: true
     },
-    socialCapital: {type: Number, required: false},
+    socialCapital: {type: Number, required: false, default: 1},
     siret: {
         type: Number,
         required: true,
@@ -22,14 +22,11 @@ const companySchema = new mongoose.Schema({
         maxlength: 14,
         minlength: 9
     },
-    address: {type: String, required: true, trim: true},
-    postalCode: {type: String, required: true, trim: true},
-    city: {type: String, required: true, trim: true},
-    country: {
-        type: String, 
-        required: false, 
-        trim: true, 
-        default: 'France'
+    address: {
+        street: {type: String, required: true, trim: true},
+        zipCode: {type: String, required: true, trim: true},
+        city: {type: String, required: true, trim: true},
+        country: {type: String, required: false, trim: true, default: 'France'},
     },
     missions: [{
         title : {type: String, required: true, trim: true},
