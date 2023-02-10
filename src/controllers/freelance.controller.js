@@ -174,6 +174,93 @@ exports.deleteFreelance = async (req, res) => {
     }
 };
 
+/*
+    * @route POST API.FindFreelance/v1/user/freelancer/searchfreelances
+    * @desc Search freelances by lastname, firstname, city, job, skill
+    * @access Private
+*/
+exports.searchFreelances = async (req, res) => {
+    try {
+        await User.find({
+            $or: [
+                { firstName: { $regex: req.body.search, $options: "i" } },
+                { lastName: { $regex: req.body.search, $options: "i" } },
+                { "address.city": { $regex: req.body.search, $options: "i" } },
+            ]
+        }).then((User) => {
+            if (!User) {
+                return res.status(404).send({
+                    message: "No User found.",
+                    auth: false,
+                    data: null
+                });
+            }
+            Freelance.find({
+                $or: [
+                    { "skills.skill": { $regex: req.body.search, $options: "i" } },
+                    { "jobs.job": { $regex: req.body.search, $options: "i" } }
+                ]
+            }).then((freelances) => {
+                if (!freelances) {
+                    return res.status(404).send({
+                        message: "No freelances found.",
+                        auth: false,
+                        data: null
+                    });
+                }
+            });
+
+            res.status(200).send({
+                message: "Freelances retrieved successfully.",
+                auth: true,
+                data: freelances
+            });
+        });
+    } catch (error) {
+        res.status(500).send({
+            message: "Error while retrieving freelances : " + error,
+            auth: false,
+            data: null
+        });
+    }
+};
+
+        // const freelances = await User.find({
+        //     isCompany: false,
+        //     $or: [
+        //         { firstName: { $regex: req.body.search, $options: "i" } },
+        //         { lastName: { $regex: req.body.search, $options: "i" } },
+        //         { "address.city": { $regex: req.body.search, $options: "i" } },
+        //         { "skills.skill": { $regex: req.body.search, $options: "i" } },
+        //         { "jobs.job": { $regex: req.body.search, $options: "i" } }
+        //     ]
+        // });
+        // if (!freelances) {
+        //     return res.status(404).send({
+        //         message: "No freelances found.",
+        //         auth: false,
+        //         data: null
+        //     });
+        // }
+        // res.status(200).send({
+        //     message: "Freelances retrieved successfully.",
+        //     auth: true,
+        //     data: freelances
+        // });
+//     } catch (error) {
+//         res.status(500).send({
+//             message: "Error while retrieving freelances : " + error,
+//             auth: false,
+//             data: null
+//         });
+//     }
+// };
+
+
+
+
+
+
 
 //-------------------- ADMIN --------------------//
 
