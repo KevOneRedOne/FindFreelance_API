@@ -1,13 +1,3 @@
-
-/*
- * 1. Create a new admin account (not used)
-
- * 20. Get all proposals
- * 21. Get one proposal
- * 22. Delete one proposal
- * 23. Update one proposal
- */
-
 const User = require("../models/user.model");
 
 /*

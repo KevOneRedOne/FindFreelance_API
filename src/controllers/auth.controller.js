@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
 const Freelancer = require('../models/freelance.model');
 const Company = require('../models/company.model');
+const Mail = require('../services/mail.service');
 
 /*
     * @route   POST API.FindFreelance/v1/auth/register/freelancer
@@ -16,7 +17,7 @@ exports.register_Freelancer = async (req, res, next) => {
     if (await User.findOne({ phoneNumber: req.body.user.phoneNumber })) {
       return res.status(400).send({ message: 'Phone number already exists', auth : false, token: null });
     }
-  
+
     const hashedPassword = await bcrypt.hash(req.body.user.password, 10);
     const newUser = new User({
       email: req.body.user.email,
@@ -53,6 +54,7 @@ exports.register_Freelancer = async (req, res, next) => {
         isCompany: newUser.isCompany || false
       }, process.env.SECRET_KEY);
   
+      Mail.SendMail(newUser.email, 'Bienvenue sur FindFreelance', 'Bienvenue sur FindFreelance, votre compte a bien été créé !');
       res.status(201).send({
         message: 'User and Freelancer created successfully',
         auth: true,
@@ -127,6 +129,7 @@ exports.register_User_inCompany = async (req, res) => {
             isFreelancer : newUser.isFreelancer,
             isCompany : newUser.isCompany,
         }, process.env.SECRET_KEY);
+        Mail.SendMail(newUser.email, 'Bienvenue sur FindFreelance', 'Bienvenue sur FindFreelance, votre compte a bien été créé !');
         return res.status(201).send({
             message: 'User and Company created successfully', 
             auth : true, 
@@ -308,6 +311,6 @@ exports.password_reset = async (req, res) => {
 //TODO: implement forgot password with mailsender
 exports.password_forgot = async (req, res) => {
 
-    
+
 };
  

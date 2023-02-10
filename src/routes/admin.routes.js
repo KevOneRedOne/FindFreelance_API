@@ -28,33 +28,9 @@ router.get('/mission/:id', verifyToken, verifyAdmin, missionController.getOneMis
 router.put('/mission/update/:id', verifyToken, verifyAdmin, missionController.updateOneMission);
 router.delete('/mission/delete/:id', verifyToken, verifyAdmin, missionController.deleteOneMission);
 
-// -------------------- SKILL --------------------
 
 module.exports = router;
 
-// //-------------------- FREELANCER --------------------
-// router.get('/admin/freelancers', verifyToken, verifyAdmin, adminController.getAllFreelancers);
-// router.get('/admin/freelancer/:id', verifyToken, verifyAdmin, adminController.getOneFreelancer);
-// router.put('/admin/freelancer/:id', verifyToken, verifyAdmin, adminController.updateOneFreelancer);
-// router.delete('/admin/freelancer/:id', verifyToken, verifyAdmin, adminController.deleteOneFreelancer);
-
-// //-------------------- COMPANY --------------------
-// router.get('/admin/companies', verifyToken, verifyAdmin, adminController.getAllCompanies);
-// router.get('/admin/company/:id', verifyToken, verifyAdmin, adminController.getOneCompany);
-// router.put('/admin/company/:id', verifyToken, verifyAdmin, adminController.updateOneCompany);
-// router.delete('/admin/company/:id', verifyToken, verifyAdmin, adminController.deleteOneCompany);
-
-// //-------------------- USER_INCOMPANY --------------------
-// router.get('/admin/users_inCompany', verifyToken, verifyAdmin, adminController.getAllUsers_inCompany);
-// router.get('/admin/user_inCompany/:id', verifyToken, verifyAdmin, adminController.getOneUser_inCompany);
-// router.put('/admin/user_inCompany/:id', verifyToken, verifyAdmin, adminController.updateOneUser_inCompany);
-// router.delete('/admin/user_inCompany/:id', verifyToken, verifyAdmin, adminController.deleteOneUser_inCompany);
-
-
-
-// //-------------------- MISSION --------------------
-// router.get('/admin/mission/all', verifyToken, verifyAdmin, adminController.getAllMissions);
-// router.get('/admin/mission/:id', verifyToken, verifyAdmin, adminController.getOneMission);
 
 // //-------------------- PROPOSAL --------------------
 // router.get('/admin/proposals', verifyToken, verifyAdmin, adminController.getAllProposals);
