@@ -121,7 +121,7 @@ exports.updateOneJob = async (req, res) => {
  * @access Private (Admin)
  * @param id
  */
-exports.deleteJob = async (req, res) => {
+exports.deleteOneJob = async (req, res) => {
   try {
     await Job.findByIdAndDelete(req.params.id).then((job) => {
       if (!job) {

@@ -306,5 +306,8 @@ exports.password_reset = async (req, res) => {
     * @body    email
 */
 //TODO: implement forgot password with mailsender
-exports.password_forgot = async (req, res) => {};
+exports.password_forgot = async (req, res) => {
+
+    
+};
  

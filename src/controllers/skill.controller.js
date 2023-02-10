@@ -121,7 +121,7 @@ exports.updateOneSkill = async (req, res) => {
  * @access Private (Admin)
  * @param id
  */
-exports.deleteSkill = async (req, res) => {
+exports.deleteOneSkill = async (req, res) => {
   try {
     await Skill.findByIdAndDelete(req.params.id).then((skill) => {
       if (!skill) {
