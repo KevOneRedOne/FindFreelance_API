@@ -307,38 +307,4 @@ exports.password_reset = async (req, res) => {
 */
 //TODO: implement forgot password with mailsender
 exports.password_forgot = async (req, res) => {};
-
-
-/*
-    *@route DELETE API.FindFreelance/v1/auth/user/delete
-    *@desc Delete account for the user
-    *@access Private
-    *@body token
-*/
-exports.delete_myAccount = async (req, res) => {
-    try {   
-        await User.findByIdAndDelete(req.userToken.id)
-        .then((user) => {
-            if(!user){
-                return res.status(404).send({
-                    message: 'User not found',
-                    auth: false,
-                    token: null
-                });
-            }
-            res.status(200).send({
-                message: 'Account deleted successfully !',
-                auth: false,
-                token: null
-            });
-        });
-    } catch (error) {
-        res.status(500).send({
-            message: 'Error while deleting account : ' + error,
-            auth: false,
-            token: null
-        });
-    }
-};
-
-  
+ 
