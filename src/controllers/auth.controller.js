@@ -316,20 +316,21 @@ exports.password_forgot = async (req, res) => {};
     *@body token
 */
 exports.delete_myAccount = async (req, res) => {
-    try {
-        const user = await User.findById(req.userToken.id);
-        if (!user){
-            return res.status(404).send({ 
-                message: 'User not found.', 
-                auth : false, 
-                token: null 
+    try {   
+        await User.findByIdAndDelete(req.userToken.id)
+        .then((user) => {
+            if(!user){
+                return res.status(404).send({
+                    message: 'User not found',
+                    auth: false,
+                    token: null
+                });
+            }
+            res.status(200).send({
+                message: 'Account deleted successfully !',
+                auth: false,
+                token: null
             });
-        }
-        await user.remove();
-        res.status(200).send({
-            message: 'Account deleted successfully !',
-            auth: false,
-            token: null
         });
     } catch (error) {
         res.status(500).send({
