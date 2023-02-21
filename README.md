@@ -1,6 +1,3 @@
-# Author: 
-    Kévin Alves
-
 # FindFreelance_API
 FindFreelance API is a RESTful API that allows companies to search for freelance according to several criteria and propose them a mission. 
 The Api using :
