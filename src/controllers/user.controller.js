@@ -22,11 +22,14 @@ exports.getMe = async (req, res, next) => {
     if (!user) {
       throw new Error('User not found');
     }
-    res.json({
-      user: CircularJSON.parse(CircularJSON.stringify(user)),
-      success: true,
+    user
+    .then((user) => {
+      res.json({
+        user: CircularJSON.parse(CircularJSON.stringify(user)),
+        success: true,
+        });
     });
-    return; // stop further execution of the function
+
   } catch (err) {
     next(err);
   }
