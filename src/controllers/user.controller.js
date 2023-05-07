@@ -1,4 +1,5 @@
 const User = require('../models/user.model');
+const CircularJSON = require('circular-json');
 
 /*
   * @route GET API.FindFreelance/v1/user/me
@@ -21,10 +22,11 @@ exports.getMe = async (req, res, next) => {
     if (!user) {
       throw new Error('User not found');
     }
-    res.send({
-      user: user,
+    res.json({
+      user: CircularJSON.parse(CircularJSON.stringify(user)),
       success: true,
     });
+    return; // stop further execution of the function
   } catch (err) {
     next(err);
   }
