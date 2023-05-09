@@ -1,6 +1,6 @@
 const nodeMailer = require('nodemailer');
 
-exports.SendMail = (email, subject, text) => {
+exports.SendMail = (email, subject, text, html) => {
     const transporter = nodeMailer.createTransport({
         host: 'smtp.ethereal.email',
         port: 587,
